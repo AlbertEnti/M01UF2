@@ -1,16 +1,20 @@
 #!/bin/bash
 
+IP=`ip address | grep inet | head -n 3 | tail -n 1 | cut -d " " -f 6 | cut -d "/" -f 1`
 SERVER="localhost"
+PORT="$PORT"
+
+echo $IP
 
 echo "(1) Send"
 
 echo "Cliente de EFTP"
 
-echo "EFTP 1.0" | nc $SERVER 3333
+echo "EFTP 1.0" | nc $SERVER $PORT
 
 echo "(2) Listen"
 
-DATA= `nc -l -p 3333 -w 0`
+DATA= `nc -l -p $PORT -w 0`
 
 echo $DATA
 
@@ -24,11 +28,11 @@ fi
 
 echo "BOOOM"
 sleep 1
-echo "BOOOM" | nc $SERVER 3333
+echo "BOOOM" | nc $SERVER $PORT
 
 echo "(6) Listen"
 
-DATA=`nc -l -p 3333 -w 0`
+DATA=`nc -l -p $PORT -w 0`
 
 echo $DATA
 
