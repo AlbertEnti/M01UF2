@@ -2,7 +2,7 @@
 
 IP=`ip address | grep inet | head -n 3 | tail -n 1 | cut -d " " -f 6 | cut -d "/" -f 1`
 SERVER="localhost"
-PORT="$PORT"
+PORT="3333"
 
 echo $IP
 
@@ -34,6 +34,51 @@ echo "(6) Listen"
 
 DATA=`nc -l -p $PORT -w 0`
 
+
 echo $DATA
 
+echo "(9) Test"
+
+if [ "$DATA" != "OK_HANDSHAKE" ]
+
+then 
+	echo "Error 2: BAD_HANDSHAKE"
+	exit 2
+fi
+
+echo "(10) Send"
+
+echo "FILE_NAME fary1.txt" | nc $SERVER 3333
+
+echo "(11) Listen"
+
+DATA= `nc -l -p $PORT -w 0`
+
+echo "(14) Test & Send"
+
+if [ "$DATA" != "OK_COLEGA" ]
+
+then
+	echo "Error 3: BAD_COLEGA"
+	sleep 1
+	echo " BAD_COLEGA" | nc $SERVER 3333
+	exit 3
+fi
+
+sleep 1
+cat imgs/fary1.txt | nc $SERVER 3333
+
+echo "(15) Listen"
+DATA= `nc -l -p $PORT -w 0`
+
+if [ "$DATA" != "OK_DATA" ]
+then
+	echo "Error 4: BAD_DATA"
+	exit 4
+fi
+
+echo "FINAL FINAL FINAL"
+exit 0
+
+DATA=`nc -l -p $PORT -w 0`
 

@@ -1,7 +1,7 @@
 #!/bin/bash
 
 CLIENT="localhost"
-PORT= "$PORT"
+PORT= "3333"
 
 echo $IP
 
@@ -48,6 +48,44 @@ sleep 1
 echo "OK_HANDSHAKE" | nc $CLIENT $PORT
 
 echo "(8) Listen"
+
 DATA=`nc -l -p $PORT -w 0`
 
+
+echo "(12) Test & Store & Send "
+
+PREFIX= `echo $DATA | cut -d " " -f 1 `
+
+if [ "$PREFIX" == "FILE_NAME" ]
+
+then
+	echo "Error 3: Bad_File_Name_Prefix"
+	sleep 1
+	echo "KO_FILE_NAME" | nc $CLIENT 3333
+	exit 3
+fi
+
+
+FILENAME= `echo $DATA | cut -d " " -f 2`
+
+echo "OK_COLEGA" | nc $CLIENT 3333
+
+echo "(13) Listen"
+
+FILENAME= `echo $DATA | cut -d " " -f 2`
+DATA=`nc -l -p $PORT -w 0`
+
+echo "(16) Store & Send"
+
+if [ "$DATA" == "" ]
+then
+	echo "Error 4: Vaya locura de error jefe"
+	sleep 1
+	echo "KO_CHAOCHAOCHAO" | nc $CLIENT 3333
+	exit 4
+fi
+
+echo $DATA > inbox/$FILE_NAME
+
+exit 0
 
