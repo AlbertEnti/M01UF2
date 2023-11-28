@@ -1,9 +1,10 @@
 #!/bin/bash
 
 IP=`ip address | grep inet | head -n 3 | tail -n 1 | cut -d " " -f 6 | cut -d "/" -f 1`
-echo $IP
 SERVER="localhost"
-TIMEOUT=1
+TIMEOUT="1"
+
+echo $IP
 
 echo "(1) Send"
 
@@ -40,36 +41,50 @@ then
 fi
 
 echo "(10) Send"
+
 sleep 1
-echo "FILE_NAME fary1.txt" | nc $SERVER 3333
+
+FILE_NAME="fary1.txt"
+
+FILE_MD5=`echo $FILE_NAME | md5sum | cut -d " " -f 1`
+
+echo "FILE_NAME $FILE_NAME $FILE_MD5" | nc $SERVER 3333
 
 echo "(11) Listen"
-DATA= `nc -l -p 3333 -w $TIMEOUT`
+DATA=`nc -l -p 3333 -w $TIMEOUT`
 
 echo "(14) Test & Send"
 
-if [ "$DATA" != "OK_COLEGA" ]
-
+if [ "$DATA" != "OK_FILE_NAME" ]
 then
-	echo "Error 3: BAD_COLEGA"
-	echo " BAD_COLEGA" | nc $SERVER 3333
+	echo "Error 3:BAD_COLEGA"
+	echo "BAD_COLEGA" | nc $SERVER 3333
 	exit 3
 fi
-
 sleep 1
 cat imgs/fary1.txt | nc $SERVER 3333
 
 echo "(15) Listen"
-DATA= `nc -l -p 3333 -w $TIMEOUT`
+DATA=`nc -l -p 3333 -w $TIMEOUT`
 
-if [ "$DATA" != "OK_COLEGA" ]
+if [ "$DATA" != "OK_DATA" ]
 then
 	echo "Error 4: BAD_DATA"
 	exit 4
 fi
 
-echo "FINAL FINAL FINAL"
+echo "(18) Send"
+FILE_MD5=`cat imgs/$FILE_NAME | md5sum | cut -d " " -f 1`
+sleep 1
+echo "FILE_MD5 $FILE_MD5" | nc $SERVER 3333
+
+echo "(19) Listen"
+DATA=`nc -l -p 3333 -w $TIMEOUT`
+
+
+
+
+echo "FIN"
 exit 0
 
-DATA=`nc -l -p 3333 -w $TIMEOUT`
 

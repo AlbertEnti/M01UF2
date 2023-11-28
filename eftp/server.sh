@@ -1,10 +1,7 @@
 #!/bin/bash
 
-CLIENT="10.65.0.62"
-TIMEOUT=1
-
-
-echo $IP
+CLIENT="localhost"
+TIMEOUT="1"
 
 echo "Servidor de EFTP"
 
@@ -25,8 +22,9 @@ then
 fi 
 
 echo "OK_HEADER"
-echo "OK_HEADER" | nc $CLIENT 3333
 sleep 1
+echo "OK_HEADER" | nc $CLIENT 3333
+
 
 echo "(4) Listen"
 
@@ -55,7 +53,7 @@ echo $DATA
 
 echo "(12) Test & Store & Send "
 
-PREFIX= `echo "$DATA" | cut -d " " -f 1 `
+PREFIX=`echo "$DATA" | cut -d " " -f 1`
 
 if [ "$PREFIX" != "FILE_NAME" ]
 
@@ -66,27 +64,44 @@ then
 	exit 3
 fi
 
-FILENAME= `echo "$DATA" | cut -d " " -f 2`
-echo "OK_COLEGA" | nc $CLIENT 3333
+FILE_NAME=`echo $DATA | cut -d " " -f 2`
+FILE_MD5=`echo $DATA | cut -d " " -f 3`
+
+FILE_MD5_LOCAL=`echo "$FILE_NAME" | md5sum | cut -d " " -f 1`
+FILENAME=`echo "$DATA" | cut -d " " -f 2`
+
+if [ "$FILE_MD5" != "$FILE_MD5_LOCAL" ]
+then
+	echo "ERROR 4: BAD FILE NAME MD5"
+	sleep 1
+	echo "KO_FILE_NAME" | nc $CLIENT 3333
+	exit 4
+fi
+echo "OK_FILE_NAME" | nc $CLIENT 3333
 
 echo "(13) Listen"
 
-FILENAME= `echo "$DATA" | cut -d " " -f 2`
-DATA=`nc -l -p 3333 -w $TIMEOUT`
+nc -l -p 3333 -w $TIMEOUT > inbox/$FILE_NAME
+
+DATA=`cat inbox/$FILENAME`
 
 echo "(16) Store & Send"
 
 if [ "$DATA" == "" ]
 then
-	echo "Error 4: Vaya locura de error jefe"
+	echo "Error 5: Empty Data"
 	sleep 1
 	echo "KO_CHAOCHAOCHAO" | nc $CLIENT 3333
-	exit 4
+	exit 5
 fi
 
-echo $DATA > inbox/$FILE_NAME
-
 sleep 1
-echo "OK_CHAO" | nc $CLIENT 3333
+echo "OK_DATA" | nc $CLIENT 3333
+
+echo "(17) Listen"
+DATA=`nc -l -p 3333 -w $TIMEOUT`
+
+echo "(20) Test & Send"
+
 exit 0
 
