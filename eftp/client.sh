@@ -1,7 +1,22 @@
 #!/bin/bash
 
-IP=`ip address | grep inet | head -n 3 | tail -n 1 | cut -d " " -f 6 | cut -d "/" -f 1`
+if [ $# -eq 0 ]
+then
+	SERVER="localhost"
+elif [ $# -eq 1 ]
+then
+	SERVER=$1
+fi
+
+echo $0
+
+echo "Parametro uno: $1"
+echo "Parametro dos: $2"
+
 SERVER="localhost"
+
+IP=`ip address | grep inet | head -n 3 | tail -n 1 | cut -d " " -f 6 | cut -d "/" -f 1`
+
 TIMEOUT="1"
 
 echo $IP
@@ -9,7 +24,7 @@ echo $IP
 echo "(1) Send"
 
 echo "Cliente de EFTP"
-echo "EFTP 1.0" | nc $SERVER 3333
+echo "EFTP 1.0 $IP" | nc $SERVER 3333
 
 echo "(2) Listen"
 DATA=`nc -l -p 3333 -w $TIMEOUT`
@@ -82,7 +97,13 @@ echo "(19) Listen"
 DATA=`nc -l -p 3333 -w $TIMEOUT`
 
 
+echo "(21) Test"
 
+if [ "$DATA" != "OK_FILE_MD5" ]
+then
+	echo "ERROR 5: FILE MD5"
+	exit 5
+fi
 
 echo "FIN"
 exit 0
