@@ -55,7 +55,20 @@ then
 	exit 2
 fi
 
-echo "(10) Send"
+echo "(9a) SEND_NUM FILES"
+NUM_FILES=`ls imgs/ | wc -l`
+sleep 1
+echo "NUM_FILES = $NUM_FILES" | nc $SERVER 3333
+
+
+echo "(9b) Listen OK/KO_NUM_FILES"
+DATA=`nc -l -p 3333 -w $TIMEOUT`
+
+for FILE_NAME in `ls imgs/`
+do
+	
+
+echo "(10b) Send File Name"
 
 sleep 1
 
@@ -104,6 +117,8 @@ then
 	echo "ERROR 5: FILE MD5"
 	exit 5
 fi
+
+done
 
 echo "FIN"
 exit 0

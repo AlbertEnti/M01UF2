@@ -37,30 +37,53 @@ echo $DATA
 
 echo "(7) Test & Send"
 
+PREFIX=`echo $DATA | cut -d " " -f 1`
+
 if [ "$DATA" != "BOOOM" ]
 
-then 
-	echo "ERROR 2: HANDSHAKE_ERROR"
+then
+    echo "ERROR 2: HANDSHAKE_ERROR"
 	sleep 1
 	echo "KO_HANDSHAKE" | nc $CLIENT 3333
 	exit 2
 fi
-
 echo "OK_HANDSHAKE"
 sleep 1
 echo "OK_HANDSHAKE" | nc $CLIENT 3333
 
-echo "(8) Listen"
+echo "(7a) Listen_Num_Files"
+DATA=`nc -l -p 3333 -w $TIMEOUT`
+echo $DATA
+
+echo "(7b) SEND OK/KO_NUM_FILES"
+PREFIX=`echo $DATA | cut -d " " -f 1`
+if [ "$PREFIX" != "NUM_FILES" ]
+then
+ 	echo "ERROR 3a: Wrong NUM_FILES PREFIX"
+    echo "KO_FILE_NUM" | nc $CLIENT 3333
+	exit 3
+fi
+
+echo "OK_FILE_NUM" | nc $CLIENT 3333
+
+FILE_NUM=`echo $DATA | cut -d " " -f 2`
+
+for N in `seq $FILE_NUM`
+do
+	echo "Archivo número $N"
+
+
+echo "(8b) Listen"
 
 DATA=`nc -l -p 3333 -w $TIMEOUT`
 echo $DATA
+
 
 echo "(12) Test & Store & Send "
 
 PREFIX=`echo "$DATA" | cut -d " " -f 1`
 
 if [ "$PREFIX" != "FILE_NAME" ]
-
 then
 	echo "Error 3: Bad_File_Name_Prefix"
 	sleep 1
@@ -130,6 +153,9 @@ then
 fi
 
 echo "OK_FILE_MD5" | nc $CLIENT 3333
+
+done
+
 
 echo "FIN"
 exit 0
